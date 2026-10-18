@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>PitPat · prueba de protocolo</title>
+<style>
+  :root { --bg: #111418; --card: #1b2027; --text: #e8eaed; --muted: #9aa0a6;
+          --green: #34a853; --amber: #f9ab00; --red: #d93025; --blue: #4c8bf5; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.4 system-ui, sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 8px 16px 104px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  h1 { font-size: 1.15rem; margin: 8px 0; }
+  .chip { padding: 4px 10px; border-radius: 999px; background: #3c4043; font-size: .9rem; white-space: nowrap; }
+  .chip.on { background: var(--green); color: #000; }
+  .chip.lost { background: var(--red); color: #fff; }
+  .note { background: #2a2f36; border-left: 4px solid var(--amber); padding: 8px 12px; border-radius: 6px; font-size: .92rem; }
+  .note.lost { border-color: var(--red); background: #3b1d1b; font-weight: 600; position: sticky; top: 0; z-index: 1; }
+  .card { background: var(--card); border-radius: 12px; padding: 12px; margin: 12px 0; }
+  .speed { font-size: 4rem; font-weight: 700; text-align: center; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .speed small { font-size: 1.2rem; color: var(--muted); font-weight: 400; }
+  .state { text-align: center; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
+  .metric { background: #232933; border-radius: 8px; padding: 8px; }
+  .metric b { display: block; font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+  .metric span, .meta { color: var(--muted); font-size: .85rem; }
+  .meta { margin-top: 8px; }
+  .row { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+  .row > * { flex: 1 1 0; }
+  button { min-height: 56px; border: 0; border-radius: 10px; background: #3c4043; color: var(--text);
+           font-size: 1.05rem; font-weight: 600; padding: 0 12px; }
+  button:disabled { opacity: .4; }
+  button.primary { background: var(--blue); color: #fff; }
+  button.go { background: var(--green); color: #000; }
+  .stopbar { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(17, 20, 24, .95);
+             padding: 8px 16px calc(8px + env(safe-area-inset-bottom)); }
+  .stopbar button { display: block; width: 100%; max-width: 720px; margin: 0 auto; min-height: 72px;
+                    font-size: 1.5rem; background: var(--red); color: #fff; }
+  .stopbar button:disabled { opacity: 1; background: #4a2422; color: #a07c7a; }
+  input, select { min-height: 48px; width: 100%; border-radius: 10px; border: 1px solid #5f6368;
+                  background: #202124; color: var(--text); font-size: 1.1rem; padding: 0 10px; }
+  .target { display: grid; grid-template-columns: 72px 1fr 72px; gap: 8px; align-items: center; }
+  .target input { text-align: center; font-size: 1.6rem; font-weight: 700; }
+  .seg { display: flex; gap: 6px; margin-top: 6px; }
+  .seg label { flex: 1; }
+  .seg input { display: none; }
+  .seg span { display: block; text-align: center; padding: 12px 4px; border-radius: 10px; background: #3c4043; }
+  .seg input:checked + span { background: var(--blue); color: #fff; }
+  .checkbox { display: flex; align-items: center; gap: 8px; min-height: 48px; }
+  .checkbox input { width: 24px; min-height: 24px; }
+  details summary { cursor: pointer; padding: 8px 0; color: var(--muted); }
+  pre { background: #0b0d10; border-radius: 8px; padding: 8px; font-size: 11px; line-height: 1.35;
+        max-height: 50vh; overflow: auto; white-space: pre-wrap; word-break: break-all; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>PitPat · prueba de protocolo</h1>
+    <span id="chip" class="chip">Sin conectar</span>
+  </header>
+  <p id="note" class="note">Herramienta de pruebas, no es la app. La cinta se moverá: ten el mando a mano.
+    Cierra antes la app PitPat (la cinta solo admite una conexión).</p>
+
+  <div class="row">
+    <button id="connect" class="primary">Conectar</button>
+    <button id="reconnect" disabled>Reconectar</button>
+  </div>
+
+  <section class="card">
+    <div class="speed"><span id="speed">–</span> <small>km/h</small></div>
+    <div class="state"><span id="state">sin datos</span> · objetivo <span id="target">–</span> km/h</div>
+    <div class="grid">
+      <div class="metric"><b id="time">–</b><span>tiempo</span></div>
+      <div class="metric"><b id="distance">–</b><span>distancia (km)</span></div>
+      <div class="metric"><b id="steps">–</b><span>pasos</span></div>
+      <div class="metric"><b id="kcal">–</b><span>kcal</span></div>
+    </div>
+    <div id="meta" class="meta">–</div>
+  </section>
+
+  <section class="card">
+    <div class="target">
+      <button id="minus" aria-label="Bajar 0,5 km/h">−0,5</button>
+      <input id="kmh" type="number" inputmode="decimal" min="1" max="6" step="0.1" value="2.0"
+             aria-label="Velocidad objetivo en km/h">
+      <button id="plus" aria-label="Subir 0,5 km/h">+0,5</button>
+    </div>
+    <div class="row">
+      <button id="start" class="go" disabled>Arrancar</button>
+      <button id="setSpeed" disabled>Fijar velocidad</button>
+      <button id="pause" disabled>Pausa</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div>Heartbeat</div>
+    <div class="seg" role="radiogroup" aria-label="Heartbeat">
+      <label><input type="radio" name="hb" value="off" checked><span>Nunca</span></label>
+      <label><input type="radio" name="hb" value="react"><span>Tras cada trama</span></label>
+      <label><input type="radio" name="hb" value="1s"><span>Cada 1 s</span></label>
+    </div>
+    <div class="row"><button id="passive" disabled>Prueba pasiva (80 s)</button></div>
+    <label class="checkbox"><input id="verbose" type="checkbox"> Registrar todas las tramas</label>
+    <details>
+      <summary>Avanzado</summary>
+      <div class="row">
+        <button id="startNoSpeed" disabled>Arrancar sin velocidad</button>
+        <button id="drop" disabled>Desconectar sin parar</button>
+      </div>
+      <div class="row"><input id="raw" placeholder="Bytes en hex, p. ej. 6a05fdf843" autocomplete="off" spellcheck="false"></div>
+      <div class="row">
+        <select id="rawTarget" aria-label="Característica de destino">
+          <option value="fba1">a FBA1</option>
+          <option value="2b11">a 2B11</option>
+        </select>
+        <button id="sendRaw" disabled>Enviar</button>
+      </div>
+      <div class="row"><button id="aux" disabled>Suscribirse a 2B10</button></div>
+    </details>
+  </section>
+
+  <section class="card">
+    <div class="row">
+      <button id="copy">Copiar registro</button>
+      <button id="download">Descargar</button>
+      <button id="clear">Borrar</button>
+    </div>
+    <pre id="log"></pre>
+  </section>
+</main>
+<div class="stopbar"><button id="stop" disabled>PARAR</button></div>
+
+<script>
+'use strict';
+
+// ------------------------------------------------------------ protocol
+// See docs/PROTOCOL.md. Same logic as tools/pitpat_probe.py.
+
+const SERVICE = 0xfba0, WRITE = 0xfba1, NOTIFY = 0xfba2;
+const AUX_SERVICE = 0x1910, AUX_NOTIFY = 0x2b10, AUX_WRITE = 0x2b11;
+const END_BYTE = 0x43;
+const OP_STOP = 0x00, OP_PAUSE = 0x02, OP_START = 0x04;
+const MODE_START = 1, MODE_SPEED = 5;
+const USER_ID = [0x00, 0x00, 0x00, 0x0d, 0xba, 0x9d, 0x76, 0xef]; // 58965456623
+const HEARTBEAT = Uint8Array.of(0x6a, 0x05, 0xfd, 0xf8, 0x43);
+const MIN_KMH = 1.0, MAX_KMH = 6.0;
+const STATES = { 0x18: 'cuenta atrás', 0x08: 'en marcha', 0x10: 'en pausa', 0x00: 'parada' };
+const PASSIVE_PHASES = [['react', 20], ['1s', 20], ['off', 40]];
+
+function checksum(frame) {
+  let value = 0;
+  for (let i = 1; i < frame.length - 2; i++) value ^= frame[i];
+  return value;
+}
+
+function isValidFrame(f) {
+  return f.length >= 5 && f[1] === f.length && f[f.length - 1] === END_BYTE && f[f.length - 2] === checksum(f);
+}
+
+function clampSpeed(kmh) {
+  return Math.round(Math.min(Math.max(kmh, MIN_KMH), MAX_KMH) * 10) / 10;
+}
+
+function buildCommand(op, kmh = 0, mode = MODE_START) {
+  const f = new Uint8Array(23);
+  const speed = Math.round(kmh * 1000);
+  f[0] = 0x6a;
+  f[1] = f.length;
+  f[6] = speed >> 8;
+  f[7] = speed & 0xff;
+  f[8] = mode;
+  f[10] = 80; // weight in kg
+  f[12] = op; // bit 3 clear = metric units
+  f.set(USER_ID, 13);
+  f[21] = checksum(f);
+  f[22] = END_BYTE;
+  return f;
+}
+
+function parseStatus(f) {
+  if (f.length < 31) return null;
+  const u16 = o => f[o] * 256 + f[o + 1];
+  const u32 = o => f[o] * 16777216 + f[o + 1] * 65536 + f[o + 2] * 256 + f[o + 3];
+  const firmware = f[25];
+  return {
+    speed: u16(3) / 1000, target: u16(5) / 1000, distanceKm: u32(7) / 1000,
+    incline: f[11], heartRate: f[13], steps: u32(14), kcal: u16(18),
+    durationS: firmware > 19 ? u32(20) / 1000 : u32(20), // ms on firmware > 19
+    firmware, flags: f[26], state: STATES[f[26] & 0x18], maxSpeed: u16(27) / 1000, maxIncline: f[29],
+  };
+}
+
+function summary(s) {
+  return `${s.state} v=${s.speed.toFixed(2)} (obj ${s.target.toFixed(2)}) km/h d=${s.distanceKm.toFixed(3)} km ` +
+    `t=${s.durationS.toFixed(0)} s pasos=${s.steps} kcal=${s.kcal} fw=${s.firmware} ` +
+    `flags=0x${s.flags.toString(16).padStart(2, '0').toUpperCase()} máx=${s.maxSpeed.toFixed(1)} ` +
+    `incl=${s.incline}/${s.maxIncline}`;
+}
+
+// Rebuilds frames split across several notifications (small ATT MTU).
+class Reassembler {
+  constructor() { this.buf = []; this.last = 0; }
+
+  feed(chunk, now) {
+    let dropped = null;
+    if (this.buf.length && now - this.last > 0.3) { // continuations arrive within milliseconds
+      dropped = Uint8Array.from(this.buf);
+      this.buf = [];
+    }
+    this.last = now;
+    this.buf.push(...chunk);
+    const frames = [];
+    while (this.buf.length >= 2) {
+      const length = this.buf[1];
+      if (length < 5) { // not a length byte: pass the data through as-is
+        frames.push(Uint8Array.from(this.buf));
+        this.buf = [];
+      } else if (this.buf.length >= length) {
+        frames.push(Uint8Array.from(this.buf.splice(0, length)));
+      } else {
+        break;
+      }
+    }
+    return { frames, dropped };
+  }
+}
+
+// Bytes that change every second while walking (counters).
+const COUNTER_BYTES = new Set([3, 4, 7, 8, 9, 10, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]);
+
+// ------------------------------------------------------------ state
+
+const $ = id => document.getElementById(id);
+const hex = bytes => Array.from(bytes, b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const t0 = performance.now();
+const logLines = [];
+
+let device = null, writeChar = null, notifyChar = null, auxWriteChar = null, auxNotifyChar = null;
+let connected = false, manualDrop = false, verbose = false, hbMode = 'off';
+let status = null, frames = 0, hbCount = 0, recentFrames = [];
+let reassembler = new Reassembler(), fragmentNoted = false, lastLogged = null, skipped = 0;
+let queue = [], writing = false, passiveRunning = false;
+
+function log(message) {
+  const line = `+${((performance.now() - t0) / 1000).toFixed(3).padStart(9)}s  ${message}`;
+  logLines.push(line);
+  console.log(line);
+  const el = $('log');
+  const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 24;
+  el.append(line + '\n');
+  while (el.childNodes.length > 1500) el.firstChild.remove(); // the full log stays in logLines
+  if (atBottom) el.scrollTop = el.scrollHeight;
+}
+
+const isMoving = () => status !== null && (status.state === 'en marcha' || status.state === 'cuenta atrás');
+
+function targetKmh() {
+  const value = parseFloat(String($('kmh').value).replace(',', '.'));
+  return clampSpeed(Number.isFinite(value) ? value : 2.0);
+}
+
+const decimal = (value, digits) => value.toFixed(digits).replace('.', ',');
+
+function clock(seconds) {
+  const s = Math.floor(seconds), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60;
+  const mmss = `${String(m).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  return h ? `${h}:${mmss}` : mmss;
+}
+
+function render() {
+  $('chip').textContent = connected ? 'Conectado' : device ? 'Desconectado' : 'Sin conectar';
+  $('chip').className = 'chip' + (connected ? ' on' : device ? ' lost' : '');
+  $('connect').disabled = connected || !navigator.bluetooth;
+  $('reconnect').disabled = connected || !device;
+  for (const id of ['start', 'pause', 'startNoSpeed', 'drop', 'sendRaw', 'aux']) $(id).disabled = !connected;
+  $('passive').disabled = !connected || passiveRunning;
+  $('setSpeed').disabled = !connected || !isMoving();
+  $('stop').disabled = !connected;
+  if (!status) return;
+  $('speed').textContent = decimal(status.speed, 1);
+  $('state').textContent = status.state;
+  $('target').textContent = decimal(status.target, 1);
+  $('time').textContent = clock(status.durationS);
+  $('distance').textContent = decimal(status.distanceKm, 2);
+  $('steps').textContent = status.steps;
+  $('kcal').textContent = status.kcal;
+  const now = performance.now() / 1000;
+  recentFrames = recentFrames.filter(t => now - t < 10);
+  $('meta').textContent = `firmware ${status.firmware} · máx ${decimal(status.maxSpeed, 1)} km/h · ` +
+    `incl. máx ${status.maxIncline} · ${decimal(recentFrames.length / 10, 1)} tramas/s · ${hbCount} heartbeats`;
+}
+
+function showNote(text, lost) {
+  $('note').textContent = text;
+  $('note').className = 'note' + (lost ? ' lost' : '');
+}
+
+// ------------------------------------------------------------ incoming
+
+function onNotify(event) {
+  const view = event.target.value;
+  const chunk = new Uint8Array(view.buffer, view.byteOffset, view.byteLength).slice();
+  const now = performance.now() / 1000;
+  if ((chunk.length < 2 || chunk[1] !== chunk.length) && (verbose || !fragmentNoted)) {
+    log(`<- fragmento [${chunk.length}] ${hex(chunk)}`);
+    fragmentNoted = true;
+  }
+  const { frames: complete, dropped } = reassembler.feed(chunk, now);
+  if (dropped) log(`!! fragmento incompleto descartado [${dropped.length}] ${hex(dropped)}`);
+  for (const frame of complete) onFrame(frame, now);
+}
+
+function onFrame(frame, now) {
+  frames++;
+  recentFrames.push(now);
+  const valid = isValidFrame(frame);
+  const parsed = valid ? parseStatus(frame) : null;
+  if (parsed) status = parsed;
+  if (shouldLog(frame, parsed, valid, now)) {
+    let text = `<- [${frame.length}] ${hex(frame)} | ${valid ? 'OK' : 'TRAMA NO VÁLIDA'}`;
+    if (parsed) text += ` | ${summary(parsed)}`;
+    if (skipped) text += ` (+${skipped} sin cambios)`;
+    log(text);
+    lastLogged = { frame, time: now, speed: parsed ? parsed.speed : 0 };
+    skipped = 0;
+  } else {
+    skipped++;
+  }
+  if (hbMode === 'react') maybeHeartbeat();
+  render();
+}
+
+function shouldLog(frame, parsed, valid, now) {
+  if (verbose || !valid || !lastLogged) return true;
+  const last = lastLogged.frame;
+  if (last.length !== frame.length || now - lastLogged.time >= 5) return true;
+  if (parsed && Math.abs(parsed.speed - lastLogged.speed) >= 0.1) return true;
+  for (let i = 0; i < frame.length - 2; i++) {
+    if (!COUNTER_BYTES.has(i) && frame[i] !== last[i]) return true;
+  }
+  return false;
+}
+
+function onAuxNotify(event) {
+  const view = event.target.value;
+  log(`<- 2B10 [${view.byteLength}] ${hex(new Uint8Array(view.buffer, view.byteOffset, view.byteLength))}`);
+}
+
+// ------------------------------------------------------------ outgoing
+
+// One GATT write at a time. STOP empties the queue and goes next.
+function send(data, label, char = writeChar, urgent = false) {
+  if (!connected || !char) return;
+  const item = { data, label, char };
+  if (urgent) queue = [item]; else queue.push(item);
+  pump();
+}
+
+async function pump() {
+  if (writing) return;
+  writing = true;
+  while (queue.length && connected) {
+    const { data, label, char } = queue.shift();
+    if (label !== 'heartbeat' || verbose) {
+      const name = char === auxWriteChar ? '2B11' : 'FBA1';
+      log(`-> ${name} [${data.length}] ${hex(data)}  (${label})`);
+    }
+    try {
+      await (char.writeValueWithResponse ? char.writeValueWithResponse(data) : char.writeValue(data));
+      if (label === 'heartbeat') hbCount++;
+    } catch (err) {
+      log(`!! error al escribir (${label}): ${err.message}`);
+    }
+  }
+  writing = false;
+}
+
+function maybeHeartbeat() {
+  if (connected && !writing && !queue.length) send(HEARTBEAT, 'heartbeat');
+}
+
+function stopNow() {
+  send(buildCommand(OP_STOP), 'PARAR', writeChar, true);
+}
+
+function sendSpeed(kmh) {
+  if (!isMoving()) {
+    log(`   la cinta no está en marcha: objetivo ${kmh.toFixed(1)} km/h guardado para "Arrancar"`);
+    return;
+  }
+  send(buildCommand(OP_START, kmh, MODE_SPEED), `velocidad ${kmh.toFixed(1)} km/h`);
+}
+
+function nudge(delta) {
+  const kmh = clampSpeed(targetKmh() + delta);
+  $('kmh').value = kmh.toFixed(1);
+  if (connected) sendSpeed(kmh);
+}
+
+function setHbMode(mode) {
+  hbMode = mode;
+  document.querySelector(`input[name="hb"][value="${mode}"]`).checked = true;
+  log(`   heartbeat: ${mode}`);
+}
+
+async function passiveTest() {
+  if (isMoving()) {
+    log('   la prueba pasiva es con la cinta parada');
+    return;
+  }
+  passiveRunning = true;
+  render();
+  const previous = hbMode, results = [];
+  for (const [mode, seconds] of PASSIVE_PHASES) {
+    setHbMode(mode);
+    const frames0 = frames, hb0 = hbCount, start = performance.now();
+    log(`== prueba pasiva: heartbeat=${mode} durante ${seconds} s`);
+    while (performance.now() - start < seconds * 1000 && connected) await sleep(200);
+    const elapsed = Math.max((performance.now() - start) / 1000, 0.001), n = frames - frames0;
+    results.push(`   hb=${mode.padEnd(5)} ${String(n).padStart(4)} tramas en ${elapsed.toFixed(1).padStart(4)} s ` +
+      `(${(n / elapsed).toFixed(2)}/s), ${hbCount - hb0} heartbeats${connected ? '' : ' — SE DESCONECTÓ'}`);
+    if (!connected) break;
+  }
+  setHbMode(previous);
+  passiveRunning = false;
+  log('== resultado de la prueba pasiva:\n' + results.join('\n'));
+  render();
+}
+
+// ------------------------------------------------------------ connection
+
+async function connect() {
+  try {
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{ namePrefix: 'PitPat' }, { services: [SERVICE] }],
+      optionalServices: [SERVICE, AUX_SERVICE],
+    });
+  } catch (err) {
+    log(err.name === 'NotFoundError' ? '   selección cancelada (o ninguna cinta a la vista)' : `!! ${err.name}: ${err.message}`);
+    return;
+  }
+  device.addEventListener('gattserverdisconnected', onDisconnected);
+  await connectGatt();
+}
+
+async function connectGatt() {
+  try {
+    log(`Conectando a ${device.name || '(sin nombre)'}…`);
+    const server = await device.gatt.connect();
+    for (const service of await server.getPrimaryServices()) {
+      log(`SERVICIO ${service.uuid}`);
+      for (const c of await service.getCharacteristics()) {
+        const props = ['read', 'write', 'writeWithoutResponse', 'notify', 'indicate'].filter(p => c.properties[p]);
+        log(`   CARACT. ${c.uuid} [${props.join(',')}]`);
+      }
+    }
+    const main = await server.getPrimaryService(SERVICE);
+    writeChar = await main.getCharacteristic(WRITE);
+    notifyChar = await main.getCharacteristic(NOTIFY);
+    try {
+      const aux = await server.getPrimaryService(AUX_SERVICE);
+      auxWriteChar = await aux.getCharacteristic(AUX_WRITE);
+      auxNotifyChar = await aux.getCharacteristic(AUX_NOTIFY);
+    } catch (err) {
+      log(`   servicio 1910 no accesible: ${err.message}`);
+    }
+    reassembler = new Reassembler();
+    fragmentNoted = false;
+    lastLogged = null;
+    notifyChar.addEventListener('characteristicvaluechanged', onNotify);
+    await notifyChar.startNotifications();
+    connected = true;
+    log(`Suscrito a FBA2. Heartbeat: ${hbMode}.`);
+    showNote('Conectado. El botón PARAR de abajo detiene la cinta en cualquier momento.', false);
+    keepScreenOn();
+  } catch (err) {
+    log(`!! no se pudo conectar: ${err.name}: ${err.message}`);
+    if (device.gatt.connected) device.gatt.disconnect();
+  }
+  render();
+}
+
+function onDisconnected() {
+  const wasConnected = connected;
+  connected = false;
+  queue = [];
+  log(manualDrop ? '!! DESCONECTADO (a petición, sin parar la cinta)' : '!! DESCONECTADO');
+  if (wasConnected && !manualDrop) {
+    navigator.vibrate?.([400, 150, 400, 150, 400]);
+  }
+  showNote('Conexión perdida. Si la cinta sigue en marcha, párala con el mando. Pulsa "Reconectar".', true);
+  manualDrop = false;
+  render();
+}
+
+async function keepScreenOn() {
+  try {
+    await navigator.wakeLock?.request('screen');
+  } catch (err) {
+    log(`   no se pudo mantener la pantalla encendida: ${err.message}`);
+  }
+}
+
+// ------------------------------------------------------------ log export
+
+function logText() {
+  return `# pitpat webbt ${new Date().toISOString()} ${navigator.userAgent}\n` + logLines.join('\n') + '\n';
+}
+
+async function copyLog() {
+  try {
+    await navigator.clipboard.writeText(logText());
+  } catch {
+    const area = Object.assign(document.createElement('textarea'), { value: logText() });
+    document.body.append(area);
+    area.select();
+    document.execCommand('copy');
+    area.remove();
+  }
+  $('copy').textContent = '¡Copiado!';
+  setTimeout(() => { $('copy').textContent = 'Copiar registro'; }, 2000);
+}
+
+function downloadLog() {
+  const d = new Date(), p = n => String(n).padStart(2, '0');
+  const stamp = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(new Blob([logText()], { type: 'text/plain' }));
+  link.download = `pitpat_log_${stamp}.txt`;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+}
+
+// ------------------------------------------------------------ wiring
+
+$('connect').onclick = connect;
+$('reconnect').onclick = connectGatt;
+$('start').onclick = () => {
+  const kmh = targetKmh();
+  $('kmh').value = kmh.toFixed(1);
+  send(buildCommand(OP_START, kmh, MODE_START), `arrancar a ${kmh.toFixed(1)} km/h`);
+};
+$('startNoSpeed').onclick = () => send(buildCommand(OP_START), 'arrancar sin velocidad');
+$('setSpeed').onclick = () => sendSpeed(targetKmh());
+$('minus').onclick = () => nudge(-0.5);
+$('plus').onclick = () => nudge(0.5);
+$('pause').onclick = () => send(buildCommand(OP_PAUSE), 'pausa');
+$('stop').onclick = stopNow;
+$('passive').onclick = passiveTest;
+$('drop').onclick = () => {
+  manualDrop = true;
+  device.gatt.disconnect();
+};
+$('sendRaw').onclick = () => {
+  const text = $('raw').value.replace(/[^0-9a-f]/gi, '');
+  if (!text || text.length % 2) {
+    log('   hex no válido');
+    return;
+  }
+  const data = Uint8Array.from(text.match(/../g), h => parseInt(h, 16));
+  const char = $('rawTarget').value === '2b11' ? auxWriteChar : writeChar;
+  if (!char) {
+    log('   característica no disponible');
+    return;
+  }
+  log(`   checksum ${isValidFrame(data) ? 'correcto' : 'NO válido'}`);
+  send(data, 'raw', char);
+};
+$('aux').onclick = async () => {
+  if (!auxNotifyChar) {
+    log('   2B10 no disponible');
+    return;
+  }
+  auxNotifyChar.addEventListener('characteristicvaluechanged', onAuxNotify);
+  await auxNotifyChar.startNotifications();
+  log('   suscrito a 2B10');
+};
+$('verbose').onchange = event => { verbose = event.target.checked; };
+for (const radio of document.querySelectorAll('input[name="hb"]')) {
+  radio.onchange = () => setHbMode(radio.value);
+}
+$('copy').onclick = copyLog;
+$('download').onclick = downloadLog;
+$('clear').onclick = () => { logLines.length = 0; $('log').textContent = ''; };
+document.addEventListener('visibilitychange', () => {
+  if (connected && document.visibilityState === 'visible') keepScreenOn();
+});
+setInterval(() => { if (hbMode === '1s') maybeHeartbeat(); }, 1000);
+
+if (!window.isSecureContext) log('!! La página no se sirve por HTTPS: Web Bluetooth no funcionará.');
+if (!navigator.bluetooth) {
+  log('!! Este navegador no tiene Web Bluetooth. Usa Chrome en Android, o Chrome/Edge en un ordenador.');
+} else {
+  navigator.bluetooth.getAvailability?.().then(ok => { if (!ok) log('!! Bluetooth no disponible: actívalo.'); });
+}
+render();
+</script>
+</body>
+</html>
