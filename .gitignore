@@ -1,0 +1,42 @@
+# Gradle
+.gradle/
+build/
+.kotlin/
+
+# Local configuration (SDK path, signing passwords, tokens...)
+local.properties
+keystore.properties
+secrets.properties
+.env
+
+# Signing keys
+*.keystore
+*.jks
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+.navigation/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Build outputs (APKs are published as GitHub Releases, never committed)
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Logs (protocol logs can contain the treadmill serial number)
+*.log
+pitpat_log_*.txt
+
+# Python (tools/)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
