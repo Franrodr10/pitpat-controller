@@ -1,7 +1,20 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
+
+// Release signing comes from environment variables (GitHub Secrets in CI) or from local.properties,
+// never from the repository. Without them, release builds use the debug key so they still install.
+val localProperties = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.isFile }?.inputStream()?.use { load(it) }
+}
+
+fun signingValue(name: String): String? =
+    providers.environmentVariable(name).orNull?.takeIf { it.isNotBlank() } ?: localProperties.getProperty(name)
+
+val releaseKeystore: String? = signingValue("SIGNING_STORE_FILE")
 
 android {
     namespace = "io.github.franrodr10.pitpat"
@@ -15,11 +28,23 @@ android {
         versionName = "0.1.0"
     }
 
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = signingValue("SIGNING_STORE_PASSWORD")
+                keyAlias = signingValue("SIGNING_KEY_ALIAS")
+                keyPassword = signingValue("SIGNING_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 
