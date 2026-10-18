@@ -39,6 +39,8 @@ La inclinación de estas cintas es mecánica, así que la app no la controla.
 - **Desde GitHub:** cada versión publicada tendrá su APK en [Releases](https://github.com/Franrodr10/pitpat-controller/releases): ábrela desde el móvil, descarga el `.apk` y ábrelo. Android pedirá permiso para instalar apps de origen desconocido (solo la primera vez). Hasta entonces, cada compilación deja el APK de depuración como artefacto en la pestaña [Actions](https://github.com/Franrodr10/pitpat-controller/actions).
 - **Por USB:** con la depuración USB activada en el móvil, `adb install -r app-debug.apk`.
 
+Cómo se publican las versiones firmadas: [`docs/RELEASING.md`](docs/RELEASING.md).
+
 ### Permisos
 
 | Android | Permiso | Para qué |
