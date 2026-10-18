@@ -18,6 +18,11 @@ App Android sencilla, rápida y fiable para controlar por Bluetooth Low Energy (
 
 Probablemente funcione con otras cintas que se controlan con la app PitPat y anuncian el servicio `0xFBA0` (por ejemplo Superun BA06-B1 o DeerRun), pero no está probado. Algunas cintas que también se anuncian como `PitPat-T01` usan otra variante del protocolo (características `0xFF01`/`0xFF02`); esas no están soportadas de momento.
 
+## Protocolo y herramientas de prueba
+
+- [`docs/PROTOCOL.md`](docs/PROTOCOL.md): el protocolo BLE de la cinta (UUID, formato de los comandos y de los datos de estado).
+- [`tools/`](tools/README.md): una página Web Bluetooth para Chrome en Android y un script Python para el PC con los que probar el protocolo en la cinta, con el procedimiento paso a paso.
+
 ## Cómo compilar
 
 > El código de la app llega en la fase 2. Cuando esté, se compilará solo con la línea de comandos, sin Android Studio.
