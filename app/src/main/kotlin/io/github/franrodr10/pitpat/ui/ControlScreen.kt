@@ -98,7 +98,7 @@ fun ControlScreen(vm: AppViewModel, state: State) {
 fun ControlContent(state: State, presets: List<Double>, snackbar: SnackbarHostState, actions: ControlActions) {
     Scaffold(
         topBar = { ConnectionBar(state, actions) },
-        bottomBar = { StopBar(onStop = actions::stop) },
+        bottomBar = { BottomControls(state, actions) },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         Column(
@@ -113,7 +113,6 @@ fun ControlContent(state: State, presets: List<Double>, snackbar: SnackbarHostSt
             SpeedDisplay(state)
             Metrics(state)
             SpeedControls(state, presets, actions)
-            MainButton(state, onClick = actions::startOrPause)
             Spacer(Modifier.height(4.dp))
         }
     }
@@ -176,8 +175,8 @@ private fun SpeedDisplay(state: State) {
     Column(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = status?.let { Format.speed(it.speedKmh) } ?: "–",
-            fontSize = 112.sp,
-            lineHeight = 112.sp,
+            fontSize = 96.sp,
+            lineHeight = 96.sp,
             fontWeight = FontWeight.Bold,
             color = if (status != null && state.fresh) MaterialTheme.colorScheme.onBackground else PitPatColors.Muted,
         )
@@ -228,9 +227,9 @@ private fun Metric(value: String?, label: String, modifier: Modifier = Modifier)
     Column(
         modifier = modifier
             .background(PitPatColors.Surface, RoundedCornerShape(14.dp))
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = 14.dp, vertical = 8.dp),
     ) {
-        Text(value ?: "–", fontSize = 30.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+        Text(value ?: "–", fontSize = 26.sp, fontWeight = FontWeight.Bold, maxLines = 1)
         Text(label, fontSize = 13.sp, color = PitPatColors.Muted, maxLines = 1)
     }
 }
@@ -292,7 +291,7 @@ private fun MainButton(state: State, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         enabled = connected && runState != RunState.STARTING,
-        modifier = Modifier.fillMaxWidth().height(88.dp),
+        modifier = Modifier.fillMaxWidth().height(80.dp),
         shape = RoundedCornerShape(20.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = color,
@@ -308,19 +307,22 @@ private fun MainButton(state: State, onClick: () -> Unit) {
     }
 }
 
-/** Always visible and always enabled: it warns when there is no link instead of doing nothing. */
+/** START/PAUSE and STOP stay pinned at the bottom, reachable on any screen size. */
 @Composable
-private fun StopBar(onStop: () -> Unit) {
-    Box(
+private fun BottomControls(state: State, actions: ControlActions) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
             .navigationBarsPadding()
             .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
+        MainButton(state, onClick = actions::startOrPause)
+        // Always enabled: without a link it warns and vibrates instead of doing nothing.
         Button(
-            onClick = onStop,
-            modifier = Modifier.fillMaxWidth().height(84.dp),
+            onClick = actions::stop,
+            modifier = Modifier.fillMaxWidth().height(80.dp),
             shape = RoundedCornerShape(20.dp),
             colors = ButtonDefaults.buttonColors(containerColor = PitPatColors.Stop, contentColor = Color.White),
         ) {
