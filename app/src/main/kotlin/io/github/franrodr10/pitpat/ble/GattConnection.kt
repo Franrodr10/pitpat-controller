@@ -63,6 +63,9 @@ class GattConnection(
     suspend fun open() {
         val connected = CompletableDeferred<Unit>()
         linkUp = connected
+        // Deprecated in the newest SDKs, but it is the overload that delivers callbacks on our own
+        // thread on every supported version (Android 8 and later).
+        @Suppress("DEPRECATION")
         val g = device.connectGatt(
             context, false, callback, BluetoothDevice.TRANSPORT_LE, BluetoothDevice.PHY_LE_1M_MASK, handler,
         ) ?: throw GattException("Android no pudo iniciar la conexión")

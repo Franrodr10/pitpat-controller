@@ -10,7 +10,6 @@
     <string name="link_reconnecting">Reconectando (intento %1$d)…</string>
     <string name="action_connect">Conectar</string>
     <string name="action_choose">Elegir cinta</string>
-    <string name="action_devices">Cintas</string>
     <string name="action_settings">Ajustes</string>
     <string name="action_back">‹ Volver</string>
 
