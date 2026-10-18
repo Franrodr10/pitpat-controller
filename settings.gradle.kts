@@ -22,5 +22,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "pitpat-controller"
 
-// :core holds the protocol layer and the safety rules (pure Kotlin, no Android).
-include(":core")
+// :core holds the protocol layer and the safety rules (pure Kotlin, no Android);
+// :app holds Bluetooth, persistence and the Compose UI.
+include(":core", ":app")

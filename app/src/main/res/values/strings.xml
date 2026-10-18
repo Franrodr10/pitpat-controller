@@ -1,0 +1,94 @@
+<resources>
+    <string name="app_name">PitPat Controller</string>
+
+    <!-- Connection -->
+    <string name="link_no_device">Sin cinta elegida</string>
+    <string name="link_disconnected">Desconectado</string>
+    <string name="link_connecting">Conectando…</string>
+    <string name="link_connected">Conectado</string>
+    <string name="link_no_data">Conectado, sin datos</string>
+    <string name="link_reconnecting">Reconectando (intento %1$d)…</string>
+    <string name="action_connect">Conectar</string>
+    <string name="action_choose">Elegir cinta</string>
+    <string name="action_devices">Cintas</string>
+    <string name="action_settings">Ajustes</string>
+    <string name="action_back">‹ Volver</string>
+
+    <!-- Treadmill state -->
+    <string name="state_stopped">Parada</string>
+    <string name="state_starting">Arrancando…</string>
+    <string name="state_running">En marcha</string>
+    <string name="state_paused">En pausa</string>
+    <string name="state_unknown">Sin datos</string>
+    <string name="unit_kmh">km/h</string>
+    <string name="target_speed">objetivo %1$s km/h</string>
+
+    <!-- Metrics -->
+    <string name="metric_time">tiempo</string>
+    <string name="metric_distance">distancia (km)</string>
+    <string name="metric_steps">pasos</string>
+    <string name="metric_steps_estimated">pasos (estimados)</string>
+    <string name="metric_kcal">kcal</string>
+
+    <!-- Controls -->
+    <string name="action_start">INICIO</string>
+    <string name="action_resume">REANUDAR</string>
+    <string name="action_pause">PAUSA</string>
+    <string name="action_starting">ARRANCANDO…</string>
+    <string name="action_start_at">a %1$s km/h</string>
+    <string name="action_stop">PARAR</string>
+    <string name="action_slower">−0,5</string>
+    <string name="action_faster">+0,5</string>
+    <string name="action_dismiss">Entendido</string>
+
+    <!-- Alerts and messages -->
+    <string name="alert_link_lost_moving">Conexión perdida. Si la cinta sigue en marcha, párala con el mando.</string>
+    <string name="alert_link_lost">Conexión perdida. Reconectando…</string>
+    <string name="alert_stop_not_confirmed">La cinta no confirma la parada. Párala con el mando.</string>
+    <string name="message_not_connected">Sin conexión con la cinta. Usa el mando.</string>
+    <string name="message_no_data">Esperando datos de la cinta…</string>
+    <string name="message_reconnected">Reconectado. La app no ha enviado ningún comando.</string>
+    <string name="message_incompatible">Ese dispositivo no es una cinta compatible.</string>
+
+    <!-- Permissions and Bluetooth -->
+    <string name="permission_title">Permiso de Bluetooth</string>
+    <string name="permission_text">Para encontrar la cinta y controlarla, la app necesita el permiso «Dispositivos cercanos». No usa tu ubicación ni internet.</string>
+    <string name="permission_text_legacy">Para buscar la cinta, Android 11 y anteriores exigen el permiso de ubicación. La app no usa tu ubicación ni internet.</string>
+    <string name="permission_grant">Conceder permiso</string>
+    <string name="permission_denied">Sin este permiso la app no puede funcionar. Actívalo en los ajustes de la app.</string>
+    <string name="permission_open_settings">Abrir ajustes</string>
+    <string name="bluetooth_off_title">Bluetooth desactivado</string>
+    <string name="bluetooth_off_text">Activa el Bluetooth para conectar con la cinta.</string>
+    <string name="bluetooth_enable">Activar Bluetooth</string>
+
+    <!-- Devices -->
+    <string name="devices_title">Elige tu cinta</string>
+    <string name="devices_scanning">Buscando cintas…</string>
+    <string name="devices_scan_again">Buscar de nuevo</string>
+    <string name="devices_none">No aparece ninguna cinta. Comprueba que está encendida y cierra la app PitPat: la cinta solo admite una conexión.</string>
+    <string name="devices_details">%1$s · señal %2$d dBm</string>
+    <string name="devices_location_off">Android 11 y anteriores solo encuentran dispositivos Bluetooth con la ubicación del móvil activada.</string>
+    <string name="devices_open_location">Activar ubicación</string>
+    <string name="devices_scan_failed">No se pudo buscar (error %1$d). Prueba a desactivar y activar el Bluetooth.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_presets">Velocidades rápidas (km/h)</string>
+    <string name="settings_presets_range">Entre %1$s y %2$s km/h, con un decimal.</string>
+    <string name="settings_save">Guardar</string>
+    <string name="settings_keep_alive">Señal de vida (heartbeat)</string>
+    <string name="settings_keep_alive_text">Envía una trama cada segundo para mantener viva la conexión. Desactívala solo si da problemas.</string>
+    <string name="settings_device">Cinta</string>
+    <string name="settings_no_device">Ninguna</string>
+    <string name="settings_change_device">Cambiar de cinta</string>
+    <string name="settings_forget_device">Olvidar cinta</string>
+    <string name="settings_log">Registro de diagnóstico</string>
+    <string name="settings_about">PitPat Controller %1$s · código abierto (MIT)</string>
+
+    <!-- Diagnostics log -->
+    <string name="log_title">Registro de diagnóstico</string>
+    <string name="log_privacy">Incluye el número de serie de la cinta: compártelo solo en privado.</string>
+    <string name="log_share">Compartir</string>
+    <string name="log_clear">Borrar</string>
+    <string name="log_subject">Registro de PitPat Controller</string>
+</resources>

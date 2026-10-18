@@ -1,0 +1,6 @@
+<resources>
+    <!-- Only the window background: everything else is drawn by Compose (always dark). -->
+    <style name="Theme.PitPat" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/background</item>
+    </style>
+</resources>
