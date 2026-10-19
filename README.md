@@ -18,7 +18,8 @@ App Android sencilla, rápida y fiable para controlar por Bluetooth Low Energy (
 - Nunca envía velocidades por debajo de 1,0 km/h ni por encima de 6,0 km/h, ni por encima del máximo que informe la cinta.
 - Los cambios de velocidad solo se envían con la cinta en marcha y con datos recientes de ella.
 - **PARAR** pasa por delante de cualquier otra orden pendiente, se reintenta si falla el envío y se repite si la cinta sigue moviéndose; si aun así no se confirma, la app avisa y vibra para que uses el mando.
-- Si se pierde la conexión, aparece un aviso y el móvil vibra. Al reconectar **no se reenvía ningún comando**: la app vuelve a leer el estado real de la cinta.
+- Si se pierde la conexión, aparece un aviso y el móvil vibra. **La cinta sigue en marcha a la misma velocidad** (no tiene parada por pérdida de enlace): usa el mando para pararla.
+- Al reconectar **no se reenvía ningún comando**: la app vuelve a leer el estado real de la cinta.
 
 ## Capturas
 

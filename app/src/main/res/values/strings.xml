@@ -41,7 +41,7 @@
     <string name="action_dismiss">Entendido</string>
 
     <!-- Alerts and messages -->
-    <string name="alert_link_lost_moving">Conexión perdida. Si la cinta sigue en marcha, párala con el mando.</string>
+    <string name="alert_link_lost_moving">Conexión perdida: la cinta sigue en marcha. Usa el mando para pararla.</string>
     <string name="alert_link_lost">Conexión perdida. Reconectando…</string>
     <string name="alert_stop_not_confirmed">La cinta no confirma la parada. Párala con el mando.</string>
     <string name="message_not_connected">Sin conexión con la cinta. Usa el mando.</string>
