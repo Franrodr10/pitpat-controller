@@ -11,7 +11,7 @@ set -euo pipefail
 
 SDK_DIR="${1:-${ANDROID_HOME:-$HOME/Android/Sdk}}"
 REPOSITORY="${ANDROID_REPOSITORY:-https://dl.google.com/android/repository}"
-PACKAGES=("platforms;android-37" "build-tools;36.0.0" "platform-tools")
+PACKAGES=("platforms;android-37.0" "build-tools;36.0.0" "platform-tools")
 
 case "$(uname -s)" in
   Linux) os=linux ;;
@@ -23,8 +23,8 @@ for tool in curl unzip java; do
   command -v "$tool" >/dev/null || { echo "Falta '$tool'." >&2; exit 1; }
 done
 
-sdkmanager="$SDK_DIR/cmdline-tools/latest/bin/sdkmanager"
-if [[ ! -x "$sdkmanager" ]]; then
+bin="$SDK_DIR/cmdline-tools/latest/bin"
+if [[ ! -x "$bin/android" && ! -x "$bin/sdkmanager" ]]; then
   # The repository manifest names the current command-line tools archive and its SHA-1.
   entry=$(curl -fsSL "$REPOSITORY/repository2-3.xml" | tr -d '\n' |
     grep -oE "<checksum type=\"sha1\">[0-9a-f]{40}</checksum>[[:space:]]*<url>commandlinetools-$os-[0-9]+_latest\.zip</url>" |
@@ -45,6 +45,13 @@ if [[ ! -x "$sdkmanager" ]]; then
   mv "$tmp/cmdline-tools" "$SDK_DIR/cmdline-tools/latest"
 fi
 
-(yes || true) | "$sdkmanager" --sdk_root="$SDK_DIR" --licenses >/dev/null
-"$sdkmanager" --sdk_root="$SDK_DIR" "${PACKAGES[@]}"
+if [[ -x "$bin/android" ]]; then
+  # Current command-line tools ship the Android CLI, which replaces sdkmanager: package paths use '/'
+  # instead of ';' and it accepts the SDK licences itself.
+  "$bin/android" --sdk="$SDK_DIR" sdk install --no-metrics "${PACKAGES[@]//;//}"
+else
+  # Older command-line tools (for example, the ones Android Studio installed) only have sdkmanager.
+  (yes 2>/dev/null || true) | "$bin/sdkmanager" --sdk_root="$SDK_DIR" --licenses >/dev/null
+  "$bin/sdkmanager" --sdk_root="$SDK_DIR" "${PACKAGES[@]}"
+fi
 echo "Android SDK listo en $SDK_DIR. Para compilar: export ANDROID_HOME=\"$SDK_DIR\""
