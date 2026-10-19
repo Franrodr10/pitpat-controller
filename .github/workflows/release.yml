@@ -56,9 +56,12 @@ jobs:
         run: |
           apk="pitpat-controller-$TAG.apk"
           cp app/build/outputs/apk/release/app-release.apk "$apk"
-          notes="APK para Android 8 o posterior: descárgalo desde el móvil y ábrelo para instalarlo."
+          # The release notes are this version's section of CHANGELOG.md, if it has one.
+          notes=$(awk -v version="${TAG#v}" '/^## /{ found = index($0, "[" version "]") > 0; next } found' CHANGELOG.md)
+          nl=$'\n\n'
+          notes="${notes:+$notes$nl}APK para Android 8 o posterior: descárgalo desde el móvil y ábrelo para instalarlo."
           if [[ "$HAS_SIGNING_KEY" != "true" ]]; then
-            notes+=$'\n\n'"Firmado con una clave de depuración: para instalar después una versión firmada habrá que desinstalar esta antes."
+            notes+="${nl}Firmado con una clave de depuración: para instalar después una versión firmada habrá que desinstalar esta antes."
           fi
           flags=()
           if [[ "$TAG" == *-* ]]; then flags+=(--prerelease); fi

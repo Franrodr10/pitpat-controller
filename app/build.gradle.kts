@@ -31,10 +31,11 @@ android {
     signingConfigs {
         if (releaseKeystore != null) {
             create("release") {
+                val password = signingValue("SIGNING_STORE_PASSWORD")
                 storeFile = file(releaseKeystore)
-                storePassword = signingValue("SIGNING_STORE_PASSWORD")
-                keyAlias = signingValue("SIGNING_KEY_ALIAS")
-                keyPassword = signingValue("SIGNING_KEY_PASSWORD")
+                storePassword = password
+                keyAlias = signingValue("SIGNING_KEY_ALIAS") ?: "pitpat"
+                keyPassword = signingValue("SIGNING_KEY_PASSWORD") ?: password
             }
         }
     }

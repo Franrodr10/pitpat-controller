@@ -11,7 +11,7 @@ keytool -genkeypair -v -keystore pitpat-release.jks -alias pitpat \
   -keyalg RSA -keysize 4096 -validity 10000
 ```
 
-`keytool` pide una contraseña para el almacén y unos datos (nombre, organización…), que pueden ser cualquiera. Si pide también la contraseña de la clave, usa la misma.
+`keytool` pide una contraseña para el almacén y unos datos (nombre, organización…), que pueden ser cualquiera. Si pide también una contraseña para la clave, pulsa Intro para usar la misma.
 
 > 🔒 **Guarda `pitpat-release.jks` y la contraseña fuera del repositorio**, por ejemplo en tu gestor de contraseñas, y haz una copia de seguridad. Si se pierden, las versiones nuevas no podrán instalarse encima de las anteriores. El `.gitignore` ya excluye `*.jks` y `*.keystore`.
 
@@ -25,20 +25,20 @@ Convierte el almacén a texto Base64:
 | macOS | `base64 -i pitpat-release.jks -o keystore.txt` |
 | Windows (PowerShell) | `[Convert]::ToBase64String([IO.File]::ReadAllBytes("pitpat-release.jks")) > keystore.txt` |
 
-En GitHub, en **Settings → Secrets and variables → Actions → New repository secret**, crea estos cuatro secretos:
+En GitHub, en **Settings → Secrets and variables → Actions → New repository secret**, crea estos dos secretos:
 
 | Secreto | Valor |
 |---|---|
 | `SIGNING_KEYSTORE_BASE64` | el contenido de `keystore.txt` |
 | `SIGNING_STORE_PASSWORD` | la contraseña del almacén |
-| `SIGNING_KEY_ALIAS` | `pitpat` (el alias usado al crearla) |
-| `SIGNING_KEY_PASSWORD` | la contraseña de la clave (la misma, si no pusiste otra) |
+
+Solo si usaste otro alias o una contraseña distinta para la clave, añade también `SIGNING_KEY_ALIAS` y `SIGNING_KEY_PASSWORD` (por defecto son `pitpat` y la contraseña del almacén).
 
 Después borra `keystore.txt`. Sin estos secretos el workflow sigue funcionando, pero firma con una clave de depuración: sirve para probar, aunque para instalar luego la versión firmada habrá que desinstalar la de prueba.
 
 ## 3. Publicar
 
-Sube la versión en `app/build.gradle.kts` (`versionCode` +1 y `versionName`), haz commit y crea el tag:
+Sube la versión en `app/build.gradle.kts` (`versionCode` +1 y `versionName`), añade su sección a [`CHANGELOG.md`](../CHANGELOG.md) (serán las notas de la Release), haz commit y crea el tag:
 
 ```bash
 git tag v0.1.0
@@ -54,8 +54,6 @@ Para compilar en tu ordenador un APK firmado con la misma clave, añade a `local
 ```properties
 SIGNING_STORE_FILE=/ruta/a/pitpat-release.jks
 SIGNING_STORE_PASSWORD=…
-SIGNING_KEY_ALIAS=pitpat
-SIGNING_KEY_PASSWORD=…
 ```
 
 y ejecuta `./gradlew assembleRelease`. El APK queda en `app/build/outputs/apk/release/app-release.apk`.
