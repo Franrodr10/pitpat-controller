@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Cada sección se usa como notas de su Release en GitHub.
 
+## [Sin publicar]
+
+### Añadido
+
+- Versión web para iPhone (con el navegador Bluefy) y para Chrome o Edge en Android y en el ordenador, publicada en https://franrodr10.github.io/pitpat-controller/. Tiene las mismas funciones y reglas de seguridad que la app Android; en iPhone, el aviso de conexión perdida suena en vez de vibrar.
+
+### Corregido
+
+- Al perderse la conexión, la app seguía mostrando «Conectado» hasta el primer intento de reconexión, y PARAR no avisaba en ese tiempo de que no había conexión.
+
 ## [0.1.0] - 2026-10-19
 
 Primera versión, probada con una caminadora plegable PitPat-T01 (MJWW). Si tienes instalada la 0.1.0-beta.1, desinstálala antes: se firmó con otra clave y Android no deja instalar esta encima.

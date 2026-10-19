@@ -57,3 +57,10 @@ SIGNING_STORE_PASSWORD=…
 ```
 
 y ejecuta `./gradlew assembleRelease`. El APK queda en `app/build/outputs/apk/release/app-release.apk`.
+
+## Versión web
+
+La versión web no lleva tags ni Releases: el workflow [`web.yml`](../.github/workflows/web.yml) la publica en GitHub Pages con cada push a `main`, si pasan sus tests. La versión publicada (fecha y commit) aparece en sus Ajustes.
+
+La primera vez hay que activar GitHub Pages: **Settings → Pages → Build and deployment → Source: GitHub Actions**. Después, vuelve a ejecutar el workflow **Web** (o haz cualquier push a `main`).
+
