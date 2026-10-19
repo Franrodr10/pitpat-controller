@@ -72,3 +72,19 @@ jobs:
 
       - id: deployment
         uses: actions/deploy-pages@v5
+
+      - name: Check that the page serves this commit
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          # GitHub Pages can take a minute to serve a new deployment; the query skips its cache.
+          for attempt in $(seq 1 18); do
+            if curl -fsS "${PAGE_URL}js/version.js?run=$GITHUB_RUN_ID-$attempt" | grep -qF "${GITHUB_SHA::7}"; then
+              curl -fsS "${PAGE_URL}?run=$GITHUB_RUN_ID" | grep -qF '<title>PitPat Controller</title>'
+              echo "En línea: $PAGE_URL (${GITHUB_SHA::7})"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::$PAGE_URL no sirve todavía el commit ${GITHUB_SHA::7}"
+          exit 1
