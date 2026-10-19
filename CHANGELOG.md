@@ -4,7 +4,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). C
 
 ## [0.1.0] - 2026-10-19
 
-Primera versión, probada con una caminadora plegable PitPat-T01 (MJWW).
+Primera versión, probada con una caminadora plegable PitPat-T01 (MJWW). Si tienes instalada la 0.1.0-beta.1, desinstálala antes: se firmó con otra clave y Android no deja instalar esta encima.
 
 ### Añadido
 
