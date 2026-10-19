@@ -2,7 +2,7 @@
 
 Este documento recoge lo que la comunidad ha descubierto del protocolo Bluetooth Low Energy de las cintas que usan la app PitPat, contrastado entre varias implementaciones independientes (ver [Fuentes](#11-fuentes-y-licencias)).
 
-**Estado:** pendiente de verificar con una cinta real. Leyenda:
+**Estado:** verificado en la práctica con la cinta del autor a través de la app (ver [§10](#10-resultados-con-la-cinta-del-autor)). Leyenda:
 
 - ✅ coincide en todas las referencias que lo tratan.
 - ⚠️ hay discrepancias entre referencias o solo lo menciona una.
@@ -20,8 +20,9 @@ Este documento recoge lo que la comunidad ha descubierto del protocolo Bluetooth
 | Velocidad | milésimas de km/h (`2500` = 2,5 km/h) ✅ |
 | Control | un comando de 23 bytes: arrancar / fijar velocidad / pausa / parar ✅ |
 | Estado | trama de 52 bytes con velocidad, distancia, pasos, kcal, duración, estado de marcha… ⚠️ |
-| Heartbeat | `6A 05 FD F8 43`; unas referencias lo envían y otras no ❓ |
+| Heartbeat | `6A 05 FD F8 43`; la app lo envía cada segundo y funciona ✅; no se ha comprobado si es imprescindible ❓ |
 | Inclinación | sin control motorizado en este modelo (a confirmar con el byte 29 del estado) ❓ |
+| Pérdida de conexión | la cinta sigue en marcha a la misma velocidad: hay que pararla con el mando ✅ |
 
 ## 1. Identificación (advertising)
 
@@ -231,7 +232,13 @@ Las herramientas de [`tools/`](../tools/README.md) registran todo lo necesario p
 
 ## 10. Resultados con la cinta del autor
 
-Pendiente.
+Caminadora plegable MJWW (`PitPat-T01`, servicios `0x1910` y `0xFBA0`), probada con PitPat Controller 0.1.0-beta.1:
+
+- ✅ La variante `FBA0` con tramas directas es la correcta: la app conecta, recibe el estado y la cinta obedece a arrancar, cambiar de velocidad, pausar, reanudar y parar.
+- ✅ La app funciona con el heartbeat activado (una trama `6A 05 FD F8 43` por segundo), que es su configuración por defecto.
+- ⚠️ **Si se pierde la conexión con la cinta en marcha, la cinta sigue andando a la misma velocidad.** No hay parada de seguridad por pérdida de enlace: hay que pararla con el mando. Por eso la app avisa con un mensaje y vibración cuando se corta.
+
+Siguen sin medir: si el heartbeat es imprescindible, la velocidad mínima real (la app usa 1,0 km/h) y si este firmware informa de los pasos (si envía 0, la app los estima).
 
 ## 11. Fuentes y licencias
 
