@@ -34,7 +34,7 @@ En GitHub, en **Settings → Secrets and variables → Actions → New repositor
 
 Solo si usaste otro alias o una contraseña distinta para la clave, añade también `SIGNING_KEY_ALIAS` y `SIGNING_KEY_PASSWORD` (por defecto son `pitpat` y la contraseña del almacén).
 
-Después borra `keystore.txt`. Sin estos secretos el workflow sigue funcionando, pero firma con una clave de depuración: sirve para probar, aunque para instalar luego la versión firmada habrá que desinstalar la de prueba.
+Después borra `keystore.txt`. Sin estos secretos solo se publican versiones de prueba (tags con sufijo, como `v0.2.0-beta.1`), firmadas con una clave de depuración: para instalar luego una versión firmada habrá que desinstalar la de prueba. Una versión final sin clave se detiene con un error antes de compilar.
 
 ## 3. Publicar
 
@@ -45,7 +45,7 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-También se puede lanzar desde GitHub: **Actions → Release → Run workflow**, indicando el tag.
+También se puede lanzar desde GitHub: **Actions → Release → Run workflow**, indicando el tag. Si una ejecución se detuvo por falta de clave, añade los secretos y pulsa **Re-run all jobs** en esa ejecución.
 
 ## Firmar en local
 
