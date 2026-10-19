@@ -1,0 +1,17 @@
+{
+  "name": "pitpat-controller-web",
+  "private": true,
+  "type": "module",
+  "description": "Versión web de PitPat Controller (Web Bluetooth). El sitio publicado es app/, sin paso de compilación.",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "test:e2e": "node --test --test-concurrency=1 test/e2e/*.e2e.js",
+    "typecheck": "tsc -p jsconfig.json",
+    "serve": "node test/e2e/server.js"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1",
+    "typescript": "6.0.2"
+  }
+}

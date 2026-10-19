@@ -40,3 +40,6 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+
+# Web version: test dependencies
+node_modules/
