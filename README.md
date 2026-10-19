@@ -2,7 +2,7 @@
 
 App Android sencilla, rápida y fiable para controlar por Bluetooth Low Energy (BLE) las cintas de andar que usan la app **PitPat** (nombre Bluetooth `PitPat-T01`). Es una alternativa libre a la app oficial: sin cuentas, sin nube y sin publicidad.
 
-> **Estado:** versión 0.1.0 en pruebas con una cinta real. El protocolo está documentado en [`docs/PROTOCOL.md`](docs/PROTOCOL.md).
+> **Estado:** versión 0.1.0, probada con una caminadora PitPat-T01. Descárgala en [Releases](https://github.com/Franrodr10/pitpat-controller/releases/latest); los cambios de cada versión están en [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Qué hace
 
@@ -23,13 +23,13 @@ App Android sencilla, rápida y fiable para controlar por Bluetooth Low Energy (
 
 ## Capturas
 
-Pendientes de la prueba con la cinta real.
+Pendientes.
 
 ## Cintas compatibles
 
 | Cinta | Nombre BLE | Servicios anunciados | Estado |
 |---|---|---|---|
-| Caminadora plegable MJWW (AliExpress), 6 km/h, inclinación 6 % | `PitPat-T01` | `0x1910`, `0xFBA0` | En pruebas |
+| Caminadora plegable MJWW (AliExpress), 6 km/h, inclinación 6 % | `PitPat-T01` | `0x1910`, `0xFBA0` | ✅ Probada |
 
 Probablemente funcione con otras cintas que se controlan con la app PitPat y anuncian el servicio `0xFBA0` (por ejemplo Superun BA06-B1 o DeerRun), pero no está probado. Algunas cintas que también se anuncian como `PitPat-T01` usan otra variante del protocolo (características `0xFF01`/`0xFF02`); esas no están soportadas de momento.
 
@@ -37,10 +37,11 @@ La inclinación de estas cintas es mecánica, así que la app no la controla.
 
 ## Instalar el APK
 
-- **Desde GitHub:** cada versión publicada tendrá su APK en [Releases](https://github.com/Franrodr10/pitpat-controller/releases): ábrela desde el móvil, descarga el `.apk` y ábrelo. Android pedirá permiso para instalar apps de origen desconocido (solo la primera vez). Hasta entonces, cada compilación deja el APK de depuración como artefacto en la pestaña [Actions](https://github.com/Franrodr10/pitpat-controller/actions).
-- **Por USB:** con la depuración USB activada en el móvil, `adb install -r app-debug.apk`.
+- **Desde GitHub (recomendado):** abre [la última Release](https://github.com/Franrodr10/pitpat-controller/releases/latest) desde el móvil, descarga el `.apk` y ábrelo. Android pedirá permiso para instalar apps de origen desconocido (solo la primera vez); si Play Protect avisa, elige «Instalar de todos modos».
+- **Pasando el archivo:** copia el `.apk` al móvil (cable, Drive, Telegram…) y ábrelo desde el gestor de archivos.
+- **Por USB:** con la depuración USB activada en el móvil (Ajustes → Opciones para desarrolladores), `adb install -r pitpat-controller-v0.1.0.apk`. `adb` viene en las platform-tools del SDK.
 
-Cómo se publican las versiones firmadas: [`docs/RELEASING.md`](docs/RELEASING.md).
+Cada push compila también un APK de depuración, que queda como artefacto en la pestaña [Actions](https://github.com/Franrodr10/pitpat-controller/actions).
 
 ### Permisos
 
@@ -52,17 +53,19 @@ Cómo se publican las versiones firmadas: [`docs/RELEASING.md`](docs/RELEASING.m
 
 ## Cómo compilar
 
-Solo hace falta la línea de comandos (no Android Studio): JDK 17 o superior y el Android SDK con la plataforma 37, con `ANDROID_HOME` apuntando a él (o `sdk.dir` en `local.properties`).
+Solo hace falta la línea de comandos (no Android Studio): un JDK 17 o superior, `curl` y `unzip`. El script [`tools/setup-android-sdk.sh`](tools/setup-android-sdk.sh) instala el Android SDK (command-line tools, plataforma 37, build-tools y platform-tools); GitHub Actions usa ese mismo script.
 
 ```bash
 git clone https://github.com/Franrodr10/pitpat-controller.git
 cd pitpat-controller
+./tools/setup-android-sdk.sh ~/Android/Sdk
+export ANDROID_HOME=~/Android/Sdk
 ./gradlew assembleDebug   # APK en app/build/outputs/apk/debug/app-debug.apk
 ./gradlew build           # tests, lint y compilación debug y release
 ./gradlew :core:test      # solo los tests del protocolo
 ```
 
-GitHub Actions ejecuta `./gradlew build` en cada push.
+GitHub Actions ejecuta `./gradlew build` en cada push, y cada tag `v*` publica el APK firmado como Release ([`docs/RELEASING.md`](docs/RELEASING.md)).
 
 ## Arquitectura
 
