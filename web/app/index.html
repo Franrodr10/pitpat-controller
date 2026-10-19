@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0e1116">
+<!-- Like the Android app, which has no internet permission: the page only loads its own files. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="description" content="Controla por Bluetooth tu cinta de andar PitPat desde el navegador: también en iPhone, con Bluefy.">
+<title>PitPat Controller</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="app.css">
+<script type="module" src="js/main.js"></script>
+</head>
+<body data-view="control">
+
+<div id="unsupported" class="screen centered" hidden>
+  <h1>Este navegador no tiene Bluetooth</h1>
+  <div id="unsupported-ios" class="stack" hidden>
+    <p>En iPhone, Safari y los demás navegadores no dejan usar Bluetooth a las páginas web. Instala Bluefy, un navegador gratuito de la App Store, y abre esta página desde Bluefy.</p>
+    <a class="button primary big" href="https://apps.apple.com/app/id1492822055">Instalar Bluefy</a>
+  </div>
+  <p id="unsupported-other" hidden>Abre esta página con Chrome o Edge. En Android también puedes instalar la app PitPat Controller.</p>
+  <p id="unsupported-insecure" hidden>Además, la página tiene que abrirse con una dirección https://.</p>
+  <div class="url-box">
+    <code id="page-url"></code>
+    <button id="copy-url" type="button">Copiar enlace</button>
+  </div>
+</div>
+
+<div id="control" class="screen" hidden>
+  <header class="topbar">
+    <span id="link-dot" class="dot" aria-hidden="true"></span>
+    <div class="link" aria-live="polite">
+      <strong id="link-text">Sin cinta elegida</strong>
+      <small id="device-name"></small>
+    </div>
+    <a class="text" href="#ajustes">Ajustes</a>
+  </header>
+  <main class="content">
+    <div id="alert" class="alert" role="alert" hidden>
+      <p id="alert-text"></p>
+      <button id="dismiss" class="text" type="button">Entendido</button>
+    </div>
+    <section id="welcome" class="card" hidden>
+      <p id="welcome-text"></p>
+      <button id="welcome-button" class="primary big" type="button">Elegir cinta</button>
+    </section>
+    <section class="speed">
+      <div id="speed" class="speed-value stale">–</div>
+      <div class="unit">km/h</div>
+      <div id="state-line" class="muted"></div>
+    </section>
+    <section class="metrics">
+      <div class="metric"><b id="metric-time">–</b><span>tiempo</span></div>
+      <div class="metric"><b id="metric-distance">–</b><span>distancia (km)</span></div>
+      <div class="metric"><b id="metric-steps">–</b><span id="metric-steps-label">pasos</span></div>
+      <div class="metric"><b id="metric-kcal">–</b><span>kcal</span></div>
+    </section>
+    <section class="speed-controls">
+      <div class="row">
+        <button class="big" type="button" data-delta="-0.5">−0,5</button>
+        <button class="big" type="button" data-delta="0.5">+0,5</button>
+      </div>
+      <div id="presets" class="row presets"></div>
+    </section>
+  </main>
+</div>
+
+<div id="settings" class="screen" hidden>
+  <header class="topbar">
+    <a class="text" href="#">‹ Volver</a>
+    <h1>Ajustes</h1>
+  </header>
+  <main class="content">
+    <form id="presets-form" novalidate>
+      <h2>Velocidades rápidas (km/h)</h2>
+      <div id="preset-inputs" class="row"></div>
+      <p id="presets-range" class="muted small"></p>
+      <button id="presets-save" class="primary" type="submit" disabled>Guardar</button>
+    </form>
+    <hr>
+    <label class="switch-row">
+      <span>
+        <strong>Señal de vida (heartbeat)</strong>
+        <small class="muted">Envía una trama cada segundo para mantener viva la conexión. Desactívala solo si da problemas.</small>
+      </span>
+      <input id="keep-alive" type="checkbox">
+    </label>
+    <hr>
+    <h2>Cinta</h2>
+    <p id="settings-device"></p>
+    <div class="row">
+      <button id="change-device" type="button">Cambiar de cinta</button>
+      <button id="forget-device" type="button">Olvidar cinta</button>
+    </div>
+    <hr>
+    <h2>Pantalla encendida</h2>
+    <p id="wake-lock-text" class="muted"></p>
+    <hr>
+    <a class="button" href="#registro">Registro de diagnóstico</a>
+    <p class="muted small">
+      PitPat Controller web <span id="version"></span> · código abierto (MIT) ·
+      <a href="https://github.com/Franrodr10/pitpat-controller">GitHub</a>
+    </p>
+  </main>
+</div>
+
+<div id="log" class="screen" hidden>
+  <header class="topbar">
+    <a class="text" href="#ajustes">‹ Volver</a>
+    <h1>Registro de diagnóstico</h1>
+  </header>
+  <main class="content">
+    <p class="muted small">Incluye el número de serie de la cinta: compártelo solo en privado.</p>
+    <div class="row">
+      <button id="log-share" class="primary" type="button">Compartir</button>
+      <button id="log-clear" type="button">Borrar</button>
+    </div>
+    <pre id="log-lines"></pre>
+  </main>
+</div>
+
+<footer id="controls" class="controls" hidden>
+  <button id="main" class="main go" type="button" disabled>
+    <span id="main-label">INICIO</span>
+    <small id="main-target"></small>
+  </button>
+  <!-- Always enabled: without a link it warns and beeps instead of doing nothing. -->
+  <button id="stop" class="stop" type="button">PARAR</button>
+</footer>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<noscript><p class="centered">PitPat Controller necesita JavaScript.</p></noscript>
+</body>
+</html>
