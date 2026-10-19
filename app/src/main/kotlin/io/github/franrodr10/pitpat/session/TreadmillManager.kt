@@ -247,6 +247,8 @@ class TreadmillManager(
                 if (linkWasUp) onLinkDown(byUser = !currentCoroutineContext().isActive)
             }
             attempt++
+            // Not connected any more from this moment: STOP must warn instead of queuing silently.
+            _state.update { it.copy(link = Link.RECONNECTING, attempt = attempt) }
             delay(minOf(1_000L shl minOf(attempt - 1, 4), MAX_BACKOFF_MS))
         }
     }
